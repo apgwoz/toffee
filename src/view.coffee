@@ -31,17 +31,18 @@ getCommonHeaders = (include_bundle_headers, auto_escape) ->
 
 #{__}if not toffee? then toffee = {}
 #{__}if not toffee.templates then toffee.templates = {}
-#{__}
+#{__}toffee.__quote_repl = {'<': '\\\\u003C', '>': '\\\\u003E', '&': '\\\\u0026'}
+#{__}toffee.__quote_alt_repl = {'<': '&lt;', '>': '&gt;', '&': '&amp;', '\"': '&quot;'}
 #{__}toffee.states = #{JSON.stringify states}
 #{__}
 #{__}toffee.__json = (locals, o) ->
 #{__}  if not o? then return "null"
-#{__}  else return "" + JSON.stringify(o).replace(/</g,'\\\\u003C').replace(/>/g,'\\\\u003E').replace(/&/g,'\\\\u0026')
+#{__}  else return "" + JSON.stringify(o).replace(/(<|>|&)/g, ((s, key) -> toffee.__quote_repl[key]))
 #{__}
 #{__}toffee.__raw = (locals, o) -> o
 #{__}
 #{__}toffee.__html = (locals, o) ->
-#{__}  (""+o).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;')
+#{__}  (""+o).replace(/(<|>|&|\")/g, ((s, key) -> toffee.__quote_alt_repl[key]))
 #{__}
 #{__}toffee.__escape = (locals, o) ->
 #{__}  if locals.__toffee.autoEscape? then ae = locals.__toffee.autoEscape
